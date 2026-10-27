@@ -20,6 +20,7 @@ _OPERATORS = {
     ast.Div: operator.truediv,
 }
 
+
 def _eval_node(node, variables):
     """Evaluate a parsed arithmetic expression without using eval()."""
     if isinstance(node, ast.Expression):
@@ -38,6 +39,7 @@ def _eval_node(node, variables):
         return -_eval_node(node.operand, variables)
     raise ValueError("Unsupported element in merit formula")
 
+
 def calculate_merit_score(gpa, extra_credits, formula=None):
     """Return the merit score using only +, -, *, / on gpa and credits."""
     formula = formula or CONFIG["formula"]
@@ -46,6 +48,7 @@ def calculate_merit_score(gpa, extra_credits, formula=None):
         return _eval_node(tree, {"gpa": gpa, "credits": extra_credits})
     except (SyntaxError, ZeroDivisionError) as err:
         raise ValueError(f"Invalid merit formula: {err}") from err
+
 
 def validate_scores(test_scores):
     """Raise ValueError if the applicant data is missing or out of range."""
@@ -60,6 +63,7 @@ def validate_scores(test_scores):
         raise ValueError("Income is missing or negative")
     return gpa, extra_credits, income
 
+
 def evaluate_applicant(student_id, test_scores, logs=None):
     """Score one applicant, store the result and return eligibility."""
     if logs is None:
@@ -71,15 +75,18 @@ def evaluate_applicant(student_id, test_scores, logs=None):
     logs.append(f"{student_id} scored {score}")
     return eligible
 
+
 def change_formula(new_formula):
     """Replace the merit formula after checking that it is valid."""
     calculate_merit_score(1, 1, new_formula)
     CONFIG["formula"] = new_formula
 
+
 def persist_results(file="scholarships.json"):
     """Save all results to a JSON file."""
     with open(file, "w", encoding="utf-8") as handle:
         json.dump(RESULTS, handle)
+
 
 def load_results(file="scholarships.json"):
     """Load results from a JSON file, if it exists and is valid."""
@@ -92,6 +99,7 @@ def load_results(file="scholarships.json"):
     RESULTS.clear()
     RESULTS.update(data)
 
+
 def print_shortlist():
     """Print every eligible applicant."""
     print("Shortlisted applicants:")
@@ -99,12 +107,14 @@ def print_shortlist():
         if record["eligible"]:
             print(" ", student_id, "score =", record["score"])
 
+
 def safe_evaluate(student_id, test_scores):
     """Evaluate an applicant, reporting invalid data instead of crashing."""
     try:
         evaluate_applicant(student_id, test_scores)
     except ValueError as err:
         print(f"Skipped {student_id}: {err}")
+
 
 def main():
     """Run the demo screening."""
@@ -122,6 +132,7 @@ def main():
     persist_results()
     load_results()
     print_shortlist()
+
 
 if __name__ == "__main__":
     main()
